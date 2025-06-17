@@ -1,0 +1,96 @@
+/* MODERN UI: Flat Design with Stronger Visual Cues */
+.related-posts-box {
+  background: #f8faff; /* Very light blue/white background */
+  border: 1px solid #e0e7ee; /* Subtle border for definition */
+  border-left: 5px solid #2196f3; /* Thicker accent bar */
+  padding: 20px 25px;
+  margin: 28px 0;
+  border-radius: 8px; /* Slightly less rounded */
+  font-family: 'Inter', 'Arial', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Very subtle shadow */
+  transition: all 0.3s ease; /* All properties transition for smoother hover */
+}
+
+.related-posts-box:hover {
+  background: #eef5fc; /* Slight background change on hover */
+  border-color: #a0c4ff; /* Border color change */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.related-posts-box h4 {
+  margin: 0 0 15px;
+  font-size: 18px;
+  color: #222;
+  border-bottom: 1px solid #dcdcdc;
+  padding-bottom: 8px;
+  font-weight: 700; /* Even bolder heading */
+}
+
+.related-posts-box ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.related-posts-box ul li {
+  margin-bottom: 14px;
+  position: relative;
+  padding-left: 30px; /* More space for the "pill" bullet */
+}
+
+.related-posts-box ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px; /* Width of the "pill" */
+  height: 10px; /* Height of the "pill" */
+  background: #2196f3; /* Solid color for the pill */
+  border-radius: 50%; /* Makes it a circle/pill */
+  line-height: 1;
+}
+
+.related-posts-box ul li a {
+  color: #2196f3;
+  text-decoration: none;
+  transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+.related-posts-box ul li a:hover,
+.related-posts-box ul li a:focus {
+  color: #1976d2;
+  text-decoration: underline;
+  outline: none;
+}
+
+.related-posts-box ul li a:focus {
+  outline: 2px dashed #1976d2;
+  outline-offset: 3px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .related-posts-box {
+    padding: 15px 20px;
+    font-size: 14px;
+    margin: 20px 0;
+  }
+
+  .related-posts-box h4 {
+    font-size: 17px;
+    margin-bottom: 10px;
+  }
+
+  .related-posts-box ul li {
+    margin-bottom: 10px;
+    padding-left: 25px; /* Adjust for smaller screens */
+  }
+  .related-posts-box ul li::before {
+      width: 8px;
+      height: 8px;
+  }
+}
