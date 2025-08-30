@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lessons of Spelling List</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+html,body{height:100%;margin:0;padding:0;display:flex;flex-direction:column;font-family:'Georgia',serif;background-color:#f9f9f9;color:#333;line-height:1.6}
+body{flex-grow:1;-webkit-user-select:auto;-moz-user-select:auto;-ms-user-select:auto;user-select:auto}
+h2{text-align:center;font-size:1rem;font-weight:400;margin-bottom:10px;color:#2c3e50}
+.filter-search-row{display:flex;justify-content:center;align-items:center;padding:10px 20px;flex-wrap:nowrap;overflow-x:auto}
+.search-input-container{position:relative;display:flex;align-items:center;margin:5px;flex:1 1 auto;min-width:150px;max-width:400px}
+#search-box,#tag-filter{padding:8px;font-size:14px;border:1px solid #ddd;border-radius:4px;box-sizing:border-box;width:100%}
+#search-box{padding-right:25px}
+#tag-filter{margin:5px;flex:1 1 auto;min-width:150px;max-width:400px;padding:8px;font-size:14px;border:1px solid #ddd;border-radius:4px;box-sizing:border-box}
+@media (max-width:480px){
+.filter-search-row{padding:10px}
+.search-input-container{width:calc(100% - 10px);max-width:none;margin:5px}
+.search-box{padding-right:25px}
+#tag-filter{width:calc(100% - 10px);max-width:none;margin:5px}
+}
+.accordion-container,#search-results-container{flex-grow:1;padding:0 20px;overflow-y:auto;max-height:calc(100vh - 160px)}
+@media (max-width:480px){
+.accordion-container,#search-results-container{max-height:calc(100vh - 160px);padding:0 10px}
+}
+#search-results-container{display:none}
+.accordion-container.hidden-by-search{display:none}
+/* General .accordion rule - specific classes below will override this */
+.accordion{
+    background-color:#3498db; /* Default light blue */
+    color:white;
+    cursor:pointer;
+    padding:15px 20px;
+    width:100%;
+    border:none;
+    text-align:left;
+    font-size:18px;
+    border-radius:8px;
+    margin-top:8px;
+    box-shadow:0 4px 6px rgba(0,0,0,.1);
+    transition:background-color .3s ease;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+/* MODIFIED: New color ranges (removed !important) */
+.accordion.color-range-1{background-color:#4CAF50;} /* Green */
+.accordion.color-range-1:hover{background-color:#388E3C;}
+
+.accordion.color-range-2{background-color:#2196F3;} /* Blue */
+.accordion.color-range-2:hover{background-color:#1976D2;}
+
+.accordion.color-range-3{background-color:#FF9800;} /* Orange */
+.accordion.color-range-3:hover{background-color:#F57C00;}
+
+/* The default fallback color (removed !important) */
+.accordion.color-default{background-color:#3498db;}
+.accordion.color-default:hover{background-color:#2980b9;}
+
+
+.lesson-title{font-weight:600;font-size:17px;word-wrap:break-word}
+.word-count{font-size:12px;color:#ecf0f1;font-family:'Courier New',monospace}
+.panel{padding:5px 0;background-color:#fff;display:none;margin-bottom:10px;overflow-x:auto}
+.idiom-table{width:100%;border-collapse:collapse;table-layout:auto}
+.idiom-table th,.idiom-table td{border:1px solid #ddd;padding:8px 12px;text-align:left;vertical-align:top;box-sizing:border-box;word-wrap:break-word}
+.idiom-table th:nth-child(1),.idiom-table td:nth-child(1){white-space:nowrap}
+.idiom-table th:nth-child(2),.idiom-table td:nth-child(2){word-wrap:break-word;overflow-wrap:break-word}
+.idiom-table .idiom,.search-result-item .item-idiom{font-weight:bold;font-size:14px;color:#2c3e50;cursor:pointer;outline:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+.idiom-table .idiom:focus,.search-result-item .item-idiom:focus{outline:2px solid #3498db}
+.idiom-table .idiom-meaning{font-family:'Times New Roman',serif;font-size:12px;color:#7f8c8d;font-style:italic}
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,.6);display:none;justify-content:center;align-items:center;z-index:1000}
+.modal-content{background-color:#fff;padding:25px;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,.3);width:90%;max-width:500px;position:relative;max-height:90vh;overflow-y:auto;font-size:14px;line-height:1.8;color:#555}
+.modal-content strong{color:#333}
+/* MODIFIED: Hint icon styling */
+.hint-icon {
+    position: absolute;
+    top: 25px;
+    right: 20px;
+    font-size: 24px;
+    color: #b929b0; /* Blue color for the lightbulb */
+    cursor: pointer;
+    transition: color .3s ease;
+}
+.hint-icon:hover {
+    color: #2980b9;
+}
+/* Removed .modal-close styling as the element is removed from HTML */
+.modal-info-line{margin-bottom:10px;padding-bottom:10px;border-bottom:1px dashed #eee}.modal-info-line:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.modal-info-line strong{display:block;margin-bottom:4px;font-size:13px;text-transform:uppercase;color:#3498db}
+/* New style for black brackets */
+.bracket-black {
+    color: red;
+}
+/* Style for hint content container */
+.modal-hint-content {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #eee;
+    text-align: center;
+}
+.modal-hint-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.modal-hint-content iframe {
+    width: 100%;
+    height: 315px; /* Standard YouTube embed height */
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.search-result-item{background-color:#fff;border:1px solid #ddd;padding:8px 12px;margin-bottom:8px;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,.05);display:flex;flex-direction:column}
+.search-result-item .item-header{display:flex;justify-content:flex-start;align-items:center;margin-bottom:0;line-height:1.4}
+.search-result-item .item-meaning{font-family:'Times New Roman',serif;font-size:.9rem;color:#555;font-style:italic;word-break:break-word;margin-top:4px;line-height:1.5}
+.item-tags{font-size:.75rem;color:#777;margin-top:6px;word-break:break-word}
+.search-results-info{text-align:center;color:#666;padding:20px}
+.search-input-container .search-clear-icon{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:#aaa;cursor:pointer;font-size:14px;display:none;z-index:1;background-color:transparent}
+.search-input-container .search-clear-icon:hover{color:#777}
+#close-all-accordions{position:fixed;bottom:20px;right:20px;background-color:#3498db;color:white;border:none;border-radius:50%;width:40px;height:40px;display:flex;justify-content:center;align-items:center;font-size:20px;cursor:pointer;box-shadow:0 4px 8px rgba(0,0,0,.2);z-index:500;transition:background-color .3s ease,opacity .3s ease;opacity:0;pointer-events:none}
+#close-all-accordions.visible{opacity:1;pointer-events:auto}
+#close-all-accordions:hover{background-color:#2980b9}
+@media print{
+body{display:none!important}
+.modal-overlay{display:none!important}
+#close-all-accordions{display:none!important}
+}
+</style>
+</head>
+<body>
+<h2><b>Lessons of</b> Spelling List 01</h2>
+<div class="filter-search-row">
+<div class="search-input-container">
+<input type="text" id="search-box" placeholder="search a word">
+<i class="fas fa-times-circle search-clear-icon" id="search-clear-icon"></i>
+</div>
+<select id="tag-filter">
+<option value="">Filter by tag</option>
+</select>
+</div>
+<div id="accordion-container" class="accordion-container"></div>
+<div id="search-results-container" class="accordion-container"></div>
+<div id="infoModalOverlay" class="modal-overlay">
+<div id="infoModalContent" class="modal-content">
+    <!-- MODIFIED: Removed the cross close icon. Only hint icon remains. -->
+    <i class="fas fa-lightbulb hint-icon" id="hint-icon" title="Show Hint"></i>
+    <div id="modalInfoDetails"></div>
+    <div id="modalHintContent" class="modal-hint-content" style="display:none;"></div>
+</div>
+</div>
+<button id="close-all-accordions" title="Close All Accordions"><i class="fas fa-chevron-up"></i></button>
+<script>
+document.addEventListener('contextmenu',e=>e.preventDefault());
+window.addEventListener('beforeprint',e=>e.preventDefault());
+const csvUrl="https://docs.google.com/spreadsheets/d/e/2PACX-1vQUjJZrNaK0ydTmp16zt-YVTlaoa573HSph-kIpybiYP6wgne9-0Pj5UHqCqJ79uDU5hM9rOt9PnYTU/pub?gid=157118912&single=true&output=csv";
+let allIdioms=[];
+let initialLessonsData={};
+const elements={
+    accordionContainer:document.getElementById("accordion-container"),
+    searchResultsContainer:document.getElementById("search-results-container"),
+    searchBox:document.getElementById("search-box"),
+    tagFilter:document.getElementById("tag-filter"),
+    searchClearIcon:document.getElementById("search-clear-icon"),
+    infoModalOverlay:document.getElementById("infoModalOverlay"),
+    modalInfoDetails:document.getElementById("modalInfoDetails"),
+    closeAllAccordionsButton:document.getElementById("close-all-accordions"),
+    // New elements for hint functionality (initialized to null, assigned in showInfoModal)
+    hintIcon:null,
+    modalHintContent:null
+};
+
+const lessonColorClasses=[
+    {range:[1,10],className:'color-range-1'},
+    {range:[11,20],className:'color-range-2'},
+    {range:[21,31],className:'color-range-3'},
+];
+
+function getLessonColorClass(lessonNumber){
+    for(const mapping of lessonColorClasses){
+        if(lessonNumber >= mapping.range[0] && lessonNumber <= mapping.range[1]){
+            return mapping.className;
+        }
+    }
+    return 'color-default';
+}
+
+function extractLessonNumber(lessonString){
+    const match = lessonString.match(/Lesson\s*(\d+)/i);
+    const number = match && match[1] ? parseInt(match[1], 10) : null;
+    return number;
+}
+
+function groupIdiomsByLesson(idiomList){
+    const groupedData={};
+    idiomList.forEach(item=>{
+        if(!groupedData[item.lesson]){
+            groupedData[item.lesson]=[];
+        }
+        groupedData[item.lesson].push(item);
+    });
+    return groupedData;
+}
+
+function parseCSV(data){
+    const rows=data.split('\n').slice(1);
+    const tags=new Set();
+    const parsedData=[];
+    const cleanField=(field)=>field?field.replace(/^"|"$/g,'').trim():'';
+
+    rows.forEach(row=>{
+        if(!row.trim())return;
+        const columns=row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+
+        // Ensure we have enough columns for all data including hint (index 11) and audio (index 13)
+        if(columns.length < 14){
+            console.warn("Skipping row due to insufficient columns (expected at least 14 for hint and audio):", row);
+            return;
+        }
+        const idiom=cleanField(columns[0]);
+        const syllables=[];
+        for(let i=1;i<=5;i++){
+            if(columns[i]&&columns[i].trim()){
+                syllables.push(cleanField(columns[i]));
+            }
+        }
+        const meaning=cleanField(columns[6]);
+        const lessonName=cleanField(columns[7]);
+        const tagString=cleanField(columns[8]);
+        const example=cleanField(columns[9]);
+        const appearedIn=cleanField(columns[10]);
+        const hintContent = cleanField(columns[11]); // Extract hint content from column L (index 11)
+        const audioUrl = cleanField(columns[13]); // Extract audio URL from column N (index 13)
+
+        if(!idiom||!meaning||!lessonName){
+            console.warn("Skipping row due to missing essential fields (idiom, meaning, or lesson):", row);
+            return;
+        }
+
+        const itemTags=tagString?tagString.split(';').map(t=>t.trim().toLowerCase()).filter(t=>t):[];
+
+        const idiomData={
+            lesson:lessonName,
+            idiom:idiom,
+            meaning:meaning,
+            tags:itemTags,
+            originalIdiom:idiom,
+            originalMeaning:meaning,
+            idiomLower:idiom.toLowerCase(),
+            meaningLower:meaning.toLowerCase(),
+            syllables:syllables,
+            example:example,
+            appearedIn:appearedIn,
+            hintContent:hintContent, // Add hint content to the data object
+            audioUrl:audioUrl
+        };
+        parsedData.push(idiomData);
+        itemTags.forEach(t=>tags.add(t));
+    });
+
+    initialLessonsData=parsedData.reduce((acc,item)=>{
+        if(!acc[item.lesson])acc[item.lesson]=[];
+        acc[item.lesson].push(item);
+        return acc;
+    },{});
+
+    allIdioms=parsedData;
+    populateTagFilter([...tags].sort());
+    renderAccordion(initialLessonsData);
+}
+
+function capitalizeFirstLetter(string) {
+    if (!string) return '';
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function populateTagFilter(tags){
+    elements.tagFilter.innerHTML='<option value="">Filter by tag</option>';
+    tags.forEach(tag=>{
+        if(tag){
+            const option=document.createElement("option");
+            option.value=tag;
+            option.textContent=capitalizeFirstLetter(tag);
+            elements.tagFilter.appendChild(option);
+        }
+    });
+}
+
+function renderAccordion(lessons){
+    elements.accordionContainer.innerHTML='';
+    elements.searchResultsContainer.style.display='none';
+    elements.accordionContainer.style.display='block';
+
+    const sortedLessonKeys = Object.keys(lessons).sort((a, b) => {
+        const numA = extractLessonNumber(a);
+        const numB = extractLessonNumber(b);
+        if (numA !== null && numB !== null) {
+            return numA - numB;
+        }
+        return a.localeCompare(b);
+    });
+
+    if(sortedLessonKeys.length===0){
+        elements.accordionContainer.innerHTML=`<p class="search-results-info">No idioms found matching your criteria in accordion view.</p>`;
+        updateCloseAllButtonVisibility();
+        return;
+    }
+
+    sortedLessonKeys.forEach(lesson=>{
+        const items=lessons[lesson].sort((a,b)=>a.idiom.localeCompare(b.idiom));
+        const accordion=document.createElement("button");
+        accordion.className="accordion";
+
+        const lessonNumber=extractLessonNumber(lesson);
+        if(lessonNumber !== null){
+            const colorClass=getLessonColorClass(lessonNumber);
+            accordion.classList.add(colorClass);
+        }else{
+            accordion.classList.add('color-default');
+        }
+
+        accordion.innerHTML=`<span class="lesson-title">${lesson}</span><span class="word-count">[${items.length}]</span>`;
+
+        const panel=document.createElement("div");
+        panel.className="panel";
+
+        const table=document.createElement("table");
+        table.className="idiom-table";
+        table.innerHTML=`<thead><tr><th>Word</th><th>Meaning</th></tr></thead><tbody></tbody>`;
+        const tbody=table.querySelector('tbody');
+
+        items.forEach(item=>{
+            const row=document.createElement("tr");
+            row.dataset.item=JSON.stringify(item);
+            row.innerHTML=`<td><span class="idiom">${item.originalIdiom}</span></td><td class="idiom-meaning">${item.originalMeaning}</td>`;
+
+            const idiomSpan=row.querySelector('.idiom');
+            let clickTimer=null;
+            const doubleClickDelay=300;
+
+            idiomSpan.addEventListener('click',function(event){
+                const currentItem=item;
+                if(clickTimer===null){
+                    clickTimer=setTimeout(function(){
+                        if (currentItem.audioUrl) {
+                            const audio = new Audio(currentItem.audioUrl);
+                            audio.play().catch(e => console.error("Error playing audio:", e));
+                        } else {
+                            console.warn("No audio URL available for:", currentItem.originalIdiom);
+                        }
+                        clickTimer=null;
+                    },doubleClickDelay);
+                }else{
+                    clearTimeout(clickTimer);
+                    clickTimer=null;
+                    showInfoModal(currentItem);
+                }
+            });
+            idiomSpan.addEventListener('dblclick',function(event){
+                event.preventDefault();
+            });
+            tbody.appendChild(row);
+        });
+
+        panel.appendChild(table);
+        accordion.addEventListener('click',function(){
+            this.classList.toggle("active");
+            const panel=this.nextElementSibling;
+            if(panel.style.display==="block"){
+                panel.style.display="none";
+            }else{
+                panel.style.display="block";
+            }
+            updateCloseAllButtonVisibility();
+        });
+
+        elements.accordionContainer.appendChild(accordion);
+        elements.accordionContainer.appendChild(panel);
+    });
+    updateCloseAllButtonVisibility();
+}
+
+function renderListView(items){
+    elements.searchResultsContainer.innerHTML='';
+    elements.accordionContainer.style.display='none';
+    elements.searchResultsContainer.style.display='block';
+    elements.closeAllAccordionsButton.classList.remove('visible');
+
+    if(items.length===0){
+        elements.searchResultsContainer.innerHTML=`<p class="search-results-info">No idioms found matching your search criteria.</p>`;
+        return;
+    }
+
+    items.forEach(item=>{
+        const itemDiv=document.createElement("div");
+        itemDiv.classList.add("search-result-item");
+        itemDiv.dataset.item=JSON.stringify(item);
+
+        let tagsHtml='';
+        if(item.tags&&item.tags.length>0){
+            const capitalizedTags = item.tags.map(tag => capitalizeFirstLetter(tag)).join(', ');
+            tagsHtml=`<div class="item-tags">Important for: ${capitalizedTags}</div>`;
+        }
+
+        itemDiv.innerHTML=`
+            <div class="item-header">
+                <span class="item-idiom">${item.originalIdiom}</span>
+            </div>
+            <div class="item-meaning">${item.originalMeaning}</div>
+            ${tagsHtml}
+        `;
+
+        const idiomSpan=itemDiv.querySelector('.item-idiom');
+        let clickTimer=null;
+        const doubleClickDelay=300;
+
+        idiomSpan.addEventListener('click',function(event){
+            const currentItem=item;
+            if(clickTimer===null){
+                clickTimer=setTimeout(function(){
+                    if (currentItem.audioUrl) {
+                        const audio = new Audio(currentItem.audioUrl);
+                        audio.play().catch(e => console.error("Error playing audio:", e));
+                    } else {
+                        console.warn("No audio URL available for:", currentItem.originalIdiom);
+                    }
+                    clickTimer=null;
+                },doubleClickDelay);
+            }else{
+                clearTimeout(clickTimer);
+                clickTimer=null;
+                showInfoModal(currentItem);
+            }
+        });
+        idiomSpan.addEventListener('dblclick',function(event){
+            event.preventDefault();
+        });
+
+        elements.searchResultsContainer.appendChild(itemDiv);
+    });
+}
+
+function handleFilterOrSearch(){
+    const searchTerm=elements.searchBox.value.toLowerCase().trim();
+    const filterTag=elements.tagFilter.value.toLowerCase();
+
+    if(elements.searchBox.value.trim()!==''){
+        elements.searchClearIcon.style.display='block';
+    }else{
+        elements.searchClearIcon.style.display='none';
+    }
+
+    if(searchTerm!==''){
+        const filteredIdioms=allIdioms.filter(item=>{
+            const matchesSearch=item.idiomLower.includes(searchTerm)||item.meaningLower.includes(searchTerm);
+            const matchesTag=!filterTag||(item.tags&&item.tags.includes(filterTag));
+            return matchesSearch&&matchesTag;
+        });
+        renderListView(filteredIdioms);
+    }else{
+        const filteredIdioms=allIdioms.filter(item=>{
+            const matchesTag=!filterTag||(item.tags&&item.tags.includes(filterTag));
+            return matchesTag;
+        });
+        const filteredLessons=groupIdiomsByLesson(filteredIdioms);
+        renderAccordion(filteredLessons);
+    }
+}
+
+function updateCloseAllButtonVisibility(){
+    if(elements.accordionContainer.style.display!=='none'){
+        const openAccordions=document.querySelectorAll('.accordion.active');
+        if(openAccordions.length>1){
+            elements.closeAllAccordionsButton.classList.add('visible');
+        }else{
+            elements.closeAllAccordionsButton.classList.remove('visible');
+        }
+    }else{
+        elements.closeAllAccordionsButton.classList.remove('visible');
+    }
+}
+
+function closeAllAccordions(){
+    document.querySelectorAll('.accordion.active').forEach(accordion=>{
+        accordion.classList.remove('active');
+        const panel=accordion.nextElementSibling;
+        if(panel&&panel.classList.contains('panel')){
+            panel.style.display='none';
+        }
+    });
+    updateCloseAllButtonVisibility();
+}
+
+function showInfoModal(itemData){
+    const detailsContainer=elements.modalInfoDetails;
+    detailsContainer.innerHTML='';
+
+    // Get references to the hint elements inside the modal
+    elements.hintIcon = document.getElementById('hint-icon');
+    elements.modalHintContent = document.getElementById('modalHintContent');
+
+    // Reset hint content visibility and content every time modal opens
+    if (elements.modalHintContent) {
+        elements.modalHintContent.style.display = 'none';
+        elements.modalHintContent.innerHTML = '';
+    }
+
+    // Show/hide hint icon based on whether hintContent exists
+    if (elements.hintIcon) {
+        elements.hintIcon.style.display = itemData.hintContent ? 'block' : 'none';
+
+        // Remove previous listener to prevent multiple bindings on subsequent modal opens
+        const oldHintIcon = elements.hintIcon.cloneNode(true);
+        elements.hintIcon.parentNode.replaceChild(oldHintIcon, elements.hintIcon);
+        elements.hintIcon = oldHintIcon; // Update reference to the new element
+
+        elements.hintIcon.onclick = function() {
+            if (elements.modalHintContent.style.display === 'none') {
+                elements.modalHintContent.style.display = 'block';
+                if (itemData.hintContent) {
+                    // Check if it's a YouTube URL
+                    const youtubeMatch = itemData.hintContent.match(/(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([\w-]{11})(?:\S+)?/);
+                    if (youtubeMatch && youtubeMatch[1]) {
+                        const videoId = youtubeMatch[1];
+                        elements.modalHintContent.innerHTML = `
+                            <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        `;
+                    } else {
+                        // Assume it's an image
+                        elements.modalHintContent.innerHTML = `
+                            <img src="${itemData.hintContent}" alt="Hint Image" onerror="this.onerror=null;this.src='https://placehold.co/400x200/cccccc/333333?text=Image+Not+Found';">
+                        `;
+                    }
+                } else {
+                    elements.modalHintContent.innerHTML = '<p>No hint content available.</p>';
+                }
+            } else {
+                elements.modalHintContent.style.display = 'none';
+                elements.modalHintContent.innerHTML = ''; // Clear content when hidden
+            }
+        };
+    }
+
+    if(itemData.syllables&&itemData.syllables.length>0&&itemData.syllables.some(s=>s.trim()!=='')){
+        const syllableLine=document.createElement('div');
+        syllableLine.classList.add('modal-info-line');
+        const syllablesText=itemData.syllables.filter(s=>s.trim()!=='').join('-');
+        syllableLine.innerHTML=`<strong>Syllables:</strong> ${syllablesText}`;
+        detailsContainer.appendChild(syllableLine);
+    }
+    if(itemData.example&&itemData.example.trim()!==''){
+        const exampleLine=document.createElement('div');
+        exampleLine.classList.add('modal-info-line');
+        exampleLine.innerHTML=`<strong>Example:</strong> ${itemData.example}`;
+        detailsContainer.appendChild(exampleLine);
+    }
+    if(itemData.appearedIn&&itemData.appearedIn.trim()!==''){
+        const appearedInLine=document.createElement('div');
+        appearedInLine.classList.add('modal-info-line');
+        // MODIFIED: Wrap square brackets with a span for black color
+        const formattedAppearedIn = itemData.appearedIn.replace(/\[/g, '<span class="bracket-black">[</span>').replace(/\]/g, '<span class="bracket-black">]</span>');
+        appearedInLine.innerHTML=`<strong>Appeared In:</strong> ${formattedAppearedIn}`;
+        detailsContainer.appendChild(appearedInLine);
+    }
+
+    if(detailsContainer.innerHTML===''){
+        detailsContainer.innerHTML='<p>No additional details available for this idiom.</p>';
+    }
+
+    elements.infoModalOverlay.style.display='flex';
+}
+
+function closeModal(){
+    elements.infoModalOverlay.style.display='none';
+    elements.modalInfoDetails.innerHTML='';
+    // Also clear and hide hint content when modal closes
+    if (elements.modalHintContent) {
+        elements.modalHintContent.style.display = 'none';
+        elements.modalHintContent.innerHTML = '';
+    }
+}
+
+elements.infoModalOverlay.addEventListener('click',function(event){
+    // Close only if clicking directly on the overlay, not its children
+    if(event.target===elements.infoModalOverlay){
+        closeModal();
+    }
+});
+
+document.addEventListener('keydown',function(event){
+    if(event.key==='Escape'&&elements.infoModalOverlay.style.display==='flex'){
+        closeModal();
+    }
+});
+
+elements.searchBox.addEventListener('input',handleFilterOrSearch);
+elements.tagFilter.addEventListener('change',handleFilterOrSearch);
+
+elements.searchClearIcon.addEventListener('click',function(){
+    elements.searchBox.value='';
+    handleFilterOrSearch();
+    elements.searchBox.focus();
+});
+
+elements.closeAllAccordionsButton.addEventListener('click',closeAllAccordions);
+
+fetch(csvUrl)
+    .then(response=>{
+        if(!response.ok){
+            throw new Error(`Failed to load data: ${response.status} ${response.statusText}`);
+        }
+        return response.text();
+    })
+    .then(parseCSV)
+    .catch(error=>{
+        elements.accordionContainer.innerHTML=`<p class="search-results-info">Error loading data. Please check the source URL or your network connection. Details: ${error.message}</p>`;
+        elements.searchResultsContainer.style.display='none';
+        elements.closeAllAccordionsButton.classList.remove('visible');
+        console.error("Error fetching or parsing CSV:", error);
+    });
+</script>
+</body>
+</html>
